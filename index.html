@@ -1,0 +1,1758 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>பங்குச் சந்தை பகுப்பாய்வு - முழுமையான பதிப்பு</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        :root {
+            --primary-blue: #1e3a8a;
+            --secondary-blue: #3b82f6;
+            --success-green: #10b981;
+            --danger-red: #ef4444;
+            --warning-yellow: #f59e0b;
+            --info-cyan: #06b6d4;
+        }
+        
+        body {
+            font-family: 'Arial Unicode MS', 'Nirmala UI', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+        
+        .tamil-font {
+            font-family: 'Nirmala UI', 'Arial Unicode MS', sans-serif;
+        }
+        
+        .main-header {
+            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+            color: white;
+            padding: 20px 0;
+            border-radius: 0 0 20px 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+        
+        .upload-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            margin-bottom: 25px;
+        }
+        
+        .upload-box {
+            border: 3px dashed #cbd5e1;
+            border-radius: 10px;
+            padding: 40px 20px;
+            text-align: center;
+            background: #f8fafc;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .upload-box:hover {
+            border-color: var(--secondary-blue);
+            background: #eff6ff;
+            transform: translateY(-2px);
+        }
+        
+        .upload-box i {
+            font-size: 48px;
+            color: var(--secondary-blue);
+            margin-bottom: 15px;
+        }
+        
+        .file-info {
+            background: #f0f9ff;
+            border-radius: 8px;
+            padding: 10px 15px;
+            margin-top: 10px;
+            border-left: 4px solid var(--secondary-blue);
+        }
+        
+        .tab-container {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            margin-bottom: 25px;
+        }
+        
+        .nav-tabs-custom .nav-link {
+            color: #4b5563;
+            font-weight: 600;
+            border: none;
+            padding: 15px 25px;
+            transition: all 0.3s;
+        }
+        
+        .nav-tabs-custom .nav-link.active {
+            color: var(--primary-blue);
+            background: #f0f9ff;
+            border-bottom: 3px solid var(--secondary-blue);
+        }
+        
+        .stock-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            border-left: 4px solid var(--secondary-blue);
+            transition: all 0.3s;
+        }
+        
+        .stock-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+        }
+        
+        .signal-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+        
+        .signal-buy {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .signal-sell {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .signal-hold {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .positive {
+            color: var(--success-green);
+            font-weight: 600;
+        }
+        
+        .negative {
+            color: var(--danger-red);
+            font-weight: 600;
+        }
+        
+        .filter-buttons .btn {
+            margin: 3px;
+            border-radius: 20px;
+            padding: 8px 20px;
+            font-weight: 500;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            margin-bottom: 15px;
+        }
+        
+        .stat-card h3 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 10px 0;
+        }
+        
+        .stat-total {
+            border-top: 4px solid var(--primary-blue);
+        }
+        
+        .stat-buy {
+            border-top: 4px solid var(--success-green);
+        }
+        
+        .stat-sell {
+            border-top: 4px solid var(--danger-red);
+        }
+        
+        .stat-hold {
+            border-top: 4px solid var(--warning-yellow);
+        }
+        
+        .whatsapp-btn {
+            background: #25D366 !important;
+            border-color: #25D366 !important;
+            color: white !important;
+            border-radius: 20px;
+            padding: 8px 20px;
+        }
+        
+        .watchlist-star {
+            color: var(--warning-yellow);
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s;
+        }
+        
+        .watchlist-star.active {
+            text-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+        }
+        
+        .chart-container {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+        
+        .export-card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s;
+            height: 100%;
+        }
+        
+        .export-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .export-card i {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+        
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            display: none;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--secondary-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .analysis-summary {
+            background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+            color: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <!-- ஏற்றும் அடைப்பு -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+        <div class="ms-3">
+            <h4>பகுப்பாய்வு நடைபெறுகிறது...</h4>
+            <p>தயவுசெய்து காத்திருக்கவும்</p>
+        </div>
+    </div>
+
+    <!-- முக்கிய உள்ளடக்கம் -->
+    <div class="container-fluid">
+        <!-- தலைப்பு -->
+        <div class="main-header">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h1 class="mb-2"><i class="fas fa-chart-line"></i> பங்குச் சந்தை பகுப்பாய்வு மென்பொருள்</h1>
+                        <p class="mb-0">8 நேற்றைய தரவு கோப்புகள் + 1 வருட ஹிஸ்டாரிகல் தரவு</p>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <div id="currentDate" class="text-white"></div>
+                        <div class="badge bg-light text-dark mt-2">முழு அளவு பகுப்பாய்வு</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <!-- தரவு பதிவேற்ற பகுதி -->
+            <div class="upload-section">
+                <h3 class="mb-4"><i class="fas fa-upload"></i> தரவு பதிவேற்றம்</h3>
+                
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h5>நேற்றைய தரவு கோப்புகள் (8 கோப்புகள்)</h5>
+                        <p class="text-muted">கீழே உள்ள அனைத்து கோப்புகளையும் பதிவேற்றவும்</p>
+                    </div>
+                </div>
+                
+                <div class="row g-3 mb-4">
+                    <!-- 8 நேற்றைய தரவு கோப்புகள் -->
+                    <div class="col-md-3 col-sm-6">
+                        <div class="upload-box" onclick="document.getElementById('file1').click()">
+                            <i class="fas fa-file-alt"></i>
+                            <h6>52 வாரம் உயர்</h6>
+                            <p class="small text-muted">52WeekHigh.csv</p>
+                            <input type="file" id="file1" accept=".csv" hidden onchange="handleFileUpload(this, 1)">
+                        </div>
+                        <div id="fileInfo1" class="file-info" style="display: none;"></div>
+                    </div>
+                    
+                    <div class="col-md-3 col-sm-6">
+                        <div class="upload-box" onclick="document.getElementById('file2').click()">
+                            <i class="fas fa-file-alt"></i>
+                            <h6>52 வாரம் தாழ்</h6>
+                            <p class="small text-muted">52WeekLow.csv</p>
+                            <input type="file" id="file2" accept=".csv" hidden onchange="handleFileUpload(this, 2)">
+                        </div>
+                        <div id="fileInfo2" class="file-info" style="display: none;"></div>
+                    </div>
+                    
+                    <div class="col-md-3 col-sm-6">
+                        <div class="upload-box" onclick="document.getElementById('file3').click()">
+                            <i class="fas fa-chart-bar"></i>
+                            <h6>அதிக பரிமாற்றம்</h6>
+                            <p class="small text-muted">LA-Volume-Gainers.csv</p>
+                            <input type="file" id="file3" accept=".csv" hidden onchange="handleFileUpload(this, 3)">
+                        </div>
+                        <div id="fileInfo3" class="file-info" style="display: none;"></div>
+                    </div>
+                    
+                    <div class="col-md-3 col-sm-6">
+                        <div class="upload-box" onclick="document.getElementById('file4').click()">
+                            <i class="fas fa-arrow-down"></i>
+                            <h6>கீழ் பட்டை</h6>
+                            <p class="small text-muted">Lower Band.csv</p>
+                            <input type="file" id="file4" accept=".csv" hidden onchange="handleFileUpload(this, 4)">
+                        </div>
+                        <div id="fileInfo4" class="file-info" style="display: none;"></div>
+                    </div>
+                    
+                    <div class="col-md-3 col-sm-6">
+                        <div class="upload-box" onclick="document.getElementById('file5').click()">
+                            <i class="fas fa-money-bill-wave"></i>
+                            <h6>சந்தை மதிப்பு</h6>
+                            <p class="small text-muted">MA-Equities-CM-value.csv</p>
+                            <input type="file" id="file5" accept=".csv" hidden onchange="handleFileUpload(this, 5)">
+                        </div>
+                        <div id="fileInfo5" class="file-info" style="display: none;"></div>
+                    </div>
+                    
+                    <div class="col-md-3 col-sm-6">
+                        <div class="upload-box" onclick="document.getElementById('file6').click()">
+                            <i class="fas fa-arrow-up"></i>
+                            <h6>மேல் பட்டை</h6>
+                            <p class="small text-muted">Upper Band.csv</p>
+                            <input type="file" id="file6" accept=".csv" hidden onchange="handleFileUpload(this, 6)">
+                        </div>
+                        <div id="fileInfo6" class="file-info" style="display: none;"></div>
+                    </div>
+                    
+                    <div class="col-md-3 col-sm-6">
+                        <div class="upload-box" onclick="document.getElementById('file7').click()">
+                            <i class="fas fa-trophy"></i>
+                            <h6>முதலிடம் பெற்றவை</h6>
+                            <p class="small text-muted">T20-GL-gainers.csv</p>
+                            <input type="file" id="file7" accept=".csv" hidden onchange="handleFileUpload(this, 7)">
+                        </div>
+                        <div id="fileInfo7" class="file-info" style="display: none;"></div>
+                    </div>
+                    
+                    <div class="col-md-3 col-sm-6">
+                        <div class="upload-box" onclick="document.getElementById('file8').click()">
+                            <i class="fas fa-chart-line"></i>
+                            <h6>தோல்வியடைந்தவை</h6>
+                            <p class="small text-muted">T20-GL-loosers.csv</p>
+                            <input type="file" id="file8" accept=".csv" hidden onchange="handleFileUpload(this, 8)">
+                        </div>
+                        <div id="fileInfo8" class="file-info" style="display: none;"></div>
+                    </div>
+                </div>
+                
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <h5>1 வருட ஹிஸ்டாரிகல் தரவு</h5>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="upload-box" onclick="document.getElementById('historicalFile').click()">
+                            <i class="fas fa-history"></i>
+                            <h6>நிஃப்டி மொத்த சந்தை</h6>
+                            <p class="small text-muted">NIFTY TOTAL MARKET Historical Data</p>
+                            <input type="file" id="historicalFile" accept=".csv" hidden onchange="handleFileUpload(this, 'historical')">
+                        </div>
+                        <div id="historicalFileInfo" class="file-info" style="display: none;"></div>
+                    </div>
+                </div>
+                
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button class="btn btn-primary btn-lg" onclick="loadSampleData()">
+                                <i class="fas fa-download"></i> மாதிரி தரவை ஏற்றுக
+                            </button>
+                            <button class="btn btn-success btn-lg" id="analyzeBtn" onclick="analyzeAllData()" disabled>
+                                <i class="fas fa-chart-bar"></i> முழு பகுப்பாய்வு தொடங்கு
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- பகுப்பாய்வு முடிவுகள் (ஆரம்பத்தில் மறைக்கப்பட்டது) -->
+            <div id="analysisResults" style="display: none;">
+                <!-- சுருக்க பகுப்பாய்வு -->
+                <div class="analysis-summary">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h3><i class="fas fa-chart-pie"></i> பகுப்பாய்வு சுருக்கம்</h3>
+                            <p id="analysisSummaryText">பங்கு சந்தை பகுப்பாய்வு முடிந்தது</p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <div class="d-grid gap-2 d-md-block">
+                                <button class="btn btn-light me-2" onclick="filterStocks('all')">
+                                    <i class="fas fa-redo"></i> மீட்டமை
+                                </button>
+                                <button class="btn btn-warning" onclick="exportFullReport()">
+                                    <i class="fas fa-file-pdf"></i> முழு அறிக்கை
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- புள்ளிவிவர அட்டைகள் -->
+                <div class="row mb-4">
+                    <div class="col-md-3 col-sm-6">
+                        <div class="stat-card stat-total">
+                            <i class="fas fa-list-alt fa-2x text-primary mb-3"></i>
+                            <h5 id="totalStocks">0</h5>
+                            <p>மொத்த பங்குகள்</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-6">
+                        <div class="stat-card stat-buy">
+                            <i class="fas fa-shopping-cart fa-2x text-success mb-3"></i>
+                            <h5 id="buyStocks">0</h5>
+                            <p>வாங்க பரிந்துரைகள்</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-6">
+                        <div class="stat-card stat-sell">
+                            <i class="fas fa-money-bill-wave fa-2x text-danger mb-3"></i>
+                            <h5 id="sellStocks">0</h5>
+                            <p>விற்க பரிந்துரைகள்</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-6">
+                        <div class="stat-card stat-hold">
+                            <i class="fas fa-hourglass-half fa-2x text-warning mb-3"></i>
+                            <h5 id="holdStocks">0</h5>
+                            <p>காத்திரு பரிந்துரைகள்</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- வடிகட்டல் பொத்தான்கள் -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="filter-buttons text-center">
+                            <button class="btn btn-primary active" onclick="filterStocks('all')">
+                                <i class="fas fa-list"></i> மொத்தம்
+                            </button>
+                            <button class="btn btn-success" onclick="filterStocks('buy')">
+                                <i class="fas fa-shopping-cart"></i> வாங்க
+                            </button>
+                            <button class="btn btn-danger" onclick="filterStocks('sell')">
+                                <i class="fas fa-money-bill-wave"></i> விற்க
+                            </button>
+                            <button class="btn btn-warning" onclick="filterStocks('hold')">
+                                <i class="fas fa-hourglass-half"></i> காத்திரு
+                            </button>
+                            <button class="btn btn-info" onclick="filterStocks('watchlist')">
+                                <i class="fas fa-star"></i> வாட்ச்லிஸ்ட்
+                            </button>
+                            <button class="btn btn-dark" onclick="filterStocks('52weekhigh')">
+                                <i class="fas fa-chart-line"></i> 52 வாரம் உயர்
+                            </button>
+                            <button class="btn btn-secondary" onclick="filterStocks('52weeklow')">
+                                <i class="fas fa-chart-line"></i> 52 வாரம் தாழ்
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- தாவல்கள் -->
+                <div class="tab-container">
+                    <ul class="nav nav-tabs nav-tabs-custom" id="analysisTabs">
+                        <li class="nav-item">
+                            <a class="nav-link active" data-bs-toggle="tab" href="#stocksTab">
+                                <i class="fas fa-table"></i> பங்கு பட்டியல்
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#chartsTab">
+                                <i class="fas fa-chart-line"></i> வரைபடங்கள்
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#exportTab">
+                                <i class="fas fa-download"></i> ஏற்றுமதி
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#whatsappTab">
+                                <i class="fab fa-whatsapp"></i> WhatsApp பகிர்வு
+                            </a>
+                        </li>
+                    </ul>
+                    
+                    <div class="tab-content p-4">
+                        <!-- பங்கு பட்டியல் தாவல் -->
+                        <div class="tab-pane fade show active" id="stocksTab">
+                            <div class="table-responsive">
+                                <table class="table table-hover" id="stocksTable">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>#</th>
+                                            <th>பங்கு</th>
+                                            <th>விலை</th>
+                                            <th>மாற்றம்</th>
+                                            <th>சிக்னல்</th>
+                                            <th>52W உயர்</th>
+                                            <th>52W தாழ்</th>
+                                            <th>வாட்ச்லிஸ்ட்</th>
+                                            <th>செயல்கள்</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="stocksTableBody">
+                                        <!-- பங்குகள் இங்கே ஏற்றப்படும் -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- வரைபடங்கள் தாவல் -->
+                        <div class="tab-pane fade" id="chartsTab">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="chart-container">
+                                        <h5><i class="fas fa-chart-pie"></i> சிக்னல் பகிர்வு</h5>
+                                        <canvas id="signalChart"></canvas>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="chart-container">
+                                        <h5><i class="fas fa-chart-bar"></i> மேல் 10 பங்குகள்</h5>
+                                        <canvas id="topStocksChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    <div class="chart-container">
+                                        <h5><i class="fas fa-chart-line"></i> நிஃப்டி சந்தை செயல்பாடு</h5>
+                                        <canvas id="niftyChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- ஏற்றுமதி தாவல் -->
+                        <div class="tab-pane fade" id="exportTab">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="export-card">
+                                        <i class="fas fa-file-csv text-primary"></i>
+                                        <h5>CSV பதிவிறக்கம்</h5>
+                                        <p>தரவை CSV வடிவத்தில் பதிவிறக்கவும்</p>
+                                        <button class="btn btn-primary" onclick="exportToCSV()">
+                                            <i class="fas fa-download"></i> CSV பதிவிறக்கம்
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="export-card">
+                                        <i class="fas fa-file-excel text-success"></i>
+                                        <h5>Excel பதிவிறக்கம்</h5>
+                                        <p>தரவை Excel வடிவத்தில் பதிவிறக்கவும்</p>
+                                        <button class="btn btn-success" onclick="exportToExcel()">
+                                            <i class="fas fa-download"></i> Excel பதிவிறக்கம்
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="export-card">
+                                        <i class="fas fa-file-pdf text-danger"></i>
+                                        <h5>PDF அறிக்கை</h5>
+                                        <p>முழு அறிக்கையை PDF ஆக உருவாக்கவும்</p>
+                                        <button class="btn btn-danger" onclick="exportToPDF()">
+                                            <i class="fas fa-download"></i> PDF உருவாக்கு
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row mt-4">
+                                <div class="col-12">
+                                    <div class="export-card">
+                                        <i class="fas fa-chart-bar text-info"></i>
+                                        <h5>விரிவான அறிக்கை</h5>
+                                        <p>முழுமையான பகுப்பாய்வு அறிக்கையை உருவாக்கவும்</p>
+                                        <button class="btn btn-info" onclick="generateDetailedReport()">
+                                            <i class="fas fa-file-alt"></i> விரிவான அறிக்கை
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- WhatsApp பகிர்வு தாவல் -->
+                        <div class="tab-pane fade" id="whatsappTab">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="export-card">
+                                        <i class="fab fa-whatsapp text-success"></i>
+                                        <h5>தனிப்பட்ட பங்கு பகிர்வு</h5>
+                                        <div class="mb-3">
+                                            <select class="form-select" id="whatsappStockSelect">
+                                                <option value="">பங்கைத் தேர்ந்தெடுக்கவும்</option>
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <input type="text" class="form-control" id="whatsappNumber" placeholder="WhatsApp எண் (+91XXXXXXXXXX)">
+                                        </div>
+                                        <button class="btn whatsapp-btn" onclick="shareStockOnWhatsApp()">
+                                            <i class="fab fa-whatsapp"></i> பங்கை பகிர்க
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="export-card">
+                                        <i class="fab fa-whatsapp text-success"></i>
+                                        <h5>முழு அறிக்கை பகிர்வு</h5>
+                                        <p>முழு பகுப்பாய்வு அறிக்கையை WhatsApp இல் பகிரவும்</p>
+                                        <div class="mb-3">
+                                            <input type="text" class="form-control" id="whatsappNumberFull" placeholder="WhatsApp எண் (+91XXXXXXXXXX)">
+                                        </div>
+                                        <button class="btn whatsapp-btn" onclick="shareFullReportOnWhatsApp()">
+                                            <i class="fab fa-whatsapp"></i> அறிக்கையை பகிர்க
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- WhatsApp பகிர்வு மாடல் -->
+    <div class="modal fade" id="whatsappModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fab fa-whatsapp"></i> WhatsApp பகிர்வு</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="whatsappMessage"></p>
+                    <div class="alert alert-info">
+                        WhatsApp இல் பகிர, கீழே உள்ள பொத்தானைக் கிளிக் செய்யவும்
+                    </div>
+                    <a id="whatsappLink" target="_blank" class="btn whatsapp-btn w-100">
+                        <i class="fab fa-whatsapp"></i> WhatsApp இல் திறக்கவும்
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ஸ்கிரிப்டுகள் -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // உலகளாவிய மாறிகள்
+        let allData = {
+            '52WeekHigh': null,
+            '52WeekLow': null,
+            'VolumeGainers': null,
+            'LowerBand': null,
+            'MarketValue': null,
+            'UpperBand': null,
+            'TopGainers': null,
+            'TopLosers': null,
+            'NiftyHistorical': null
+        };
+        
+        let analyzedStocks = [];
+        let watchlist = new Set();
+        let currentFilter = 'all';
+        let charts = {};
+        
+        // பக்கத்தை ஏற்றும் போது
+        document.addEventListener('DOMContentLoaded', function() {
+            // தேதியை அமைக்கவும்
+            const now = new Date();
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            };
+            document.getElementById('currentDate').textContent = 
+                now.toLocaleDateString('ta-IN', options);
+        });
+        
+        // கோப்பு பதிவேற்றத்தை கையாளுதல்
+        function handleFileUpload(fileInput, fileNumber) {
+            const file = fileInput.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                try {
+                    const text = e.target.result;
+                    let data;
+                    
+                    // CSV வடிவத்தை சரிசெய்தல்
+                    let csvText = text;
+                    if (csvText.includes('﻿')) {
+                        csvText = csvText.replace('﻿', '');
+                    }
+                    
+                    // CSV ஐ பாகுபடுத்துதல்
+                    const lines = csvText.split('\n');
+                    const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+                    
+                    data = [];
+                    for (let i = 1; i < lines.length; i++) {
+                        if (!lines[i].trim()) continue;
+                        
+                        // விலைப்பட்டியல் CSVக்கு சிறப்பு கையாளுதல்
+                        let values;
+                        if (lines[i].includes('","')) {
+                            values = lines[i].split('","').map(v => v.replace(/"/g, ''));
+                        } else {
+                            values = lines[i].split(',').map(v => v.trim());
+                        }
+                        
+                        const row = {};
+                        headers.forEach((header, index) => {
+                            if (values[index] !== undefined) {
+                                row[header] = values[index];
+                            }
+                        });
+                        
+                        if (Object.keys(row).length > 0) {
+                            data.push(row);
+                        }
+                    }
+                    
+                    // தரவை சேமித்தல்
+                    let fileType;
+                    switch(fileNumber) {
+                        case 1: fileType = '52WeekHigh'; break;
+                        case 2: fileType = '52WeekLow'; break;
+                        case 3: fileType = 'VolumeGainers'; break;
+                        case 4: fileType = 'LowerBand'; break;
+                        case 5: fileType = 'MarketValue'; break;
+                        case 6: fileType = 'UpperBand'; break;
+                        case 7: fileType = 'TopGainers'; break;
+                        case 8: fileType = 'TopLosers'; break;
+                        case 'historical': fileType = 'NiftyHistorical'; break;
+                    }
+                    
+                    allData[fileType] = data;
+                    
+                    // கோப்பு தகவலைக் காட்டுதல்
+                    const fileInfoId = fileType === 'NiftyHistorical' ? 
+                        'historicalFileInfo' : `fileInfo${fileNumber}`;
+                    
+                    document.getElementById(fileInfoId).innerHTML = `
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-check-circle text-success"></i>
+                                <strong>${file.name}</strong>
+                                <small class="text-muted"> (${data.length} பதிவுகள்)</small>
+                            </div>
+                            <button class="btn btn-sm btn-outline-danger" onclick="removeFile('${fileType}')">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    `;
+                    document.getElementById(fileInfoId).style.display = 'block';
+                    
+                    // அனைத்து கோப்புகளும் பதிவேற்றப்பட்டதா என சரிபார்க்கவும்
+                    checkAllFilesUploaded();
+                    
+                } catch (error) {
+                    alert(`கோப்பை படிக்க முடியவில்லை: ${error.message}`);
+                    console.error(error);
+                }
+            };
+            
+            reader.readAsText(file);
+        }
+        
+        // கோப்பை நீக்குதல்
+        function removeFile(fileType) {
+            allData[fileType] = null;
+            
+            // கோப்பு தகவலை மறைக்கவும்
+            let fileInfoId;
+            switch(fileType) {
+                case '52WeekHigh': fileInfoId = 'fileInfo1'; break;
+                case '52WeekLow': fileInfoId = 'fileInfo2'; break;
+                case 'VolumeGainers': fileInfoId = 'fileInfo3'; break;
+                case 'LowerBand': fileInfoId = 'fileInfo4'; break;
+                case 'MarketValue': fileInfoId = 'fileInfo5'; break;
+                case 'UpperBand': fileInfoId = 'fileInfo6'; break;
+                case 'TopGainers': fileInfoId = 'fileInfo7'; break;
+                case 'TopLosers': fileInfoId = 'fileInfo8'; break;
+                case 'NiftyHistorical': fileInfoId = 'historicalFileInfo'; break;
+            }
+            
+            if (fileInfoId) {
+                document.getElementById(fileInfoId).style.display = 'none';
+            }
+            
+            // பகுப்பாய்வு பொத்தானை மறுபரிசீலனை செய்யவும்
+            checkAllFilesUploaded();
+        }
+        
+        // அனைத்து கோப்புகளும் பதிவேற்றப்பட்டதா என சரிபார்க்கவும்
+        function checkAllFilesUploaded() {
+            const allUploaded = Object.values(allData).every(data => data !== null);
+            document.getElementById('analyzeBtn').disabled = !allUploaded;
+        }
+        
+        // மாதிரி தரவை ஏற்றுதல்
+        function loadSampleData() {
+            // நேற்றைய 8 கோப்புகளுக்கான மாதிரி தரவு
+            const sampleFiles = {
+                '52WeekHigh': `Symbol ,Series ,LTP ,%chng ,New 52W/H price ,Prev.High ,Prev. High Date 
+ACCORD,SM,29,0,29,29,22-Dec-2025
+AMCL,ST,362.9,-1.92,385,371,24-Dec-2025
+ANONDITA,ST,910.35,5,910.35,867,24-Dec-2025
+ASHAPURMIN,EQ,897,2.22,915.35,901.5,24-Dec-2025
+AXISILVER,EQ,228,4.88,228,217.99,24-Dec-2025
+AXITA,BE,13.14,0.69,13.19,13.1,24-Dec-2025
+BELRISE,EQ,179.05,3.6,183.44,179.9,23-Dec-2025`,
+                
+                '52WeekLow': `Symbol ,Series ,LTP ,%chng ,New 52W/L price ,Prev.Low ,Prev. Low Date 
+ABAN,BE,21.24,-4.97,21.24,22.35,24-Dec-2025
+ABSLLIQUID,EQ,1000.01,0,999.99,999.99,19-Dec-2025
+ACC,EQ,1735.5,-0.22,1725,1735,24-Dec-2025
+ANNAPURNA,SM,207.85,-1.82,205.05,208,09-Dec-2025
+APTECHT,EQ,94.99,-0.78,94.5,94.5,19-Dec-2025`,
+                
+                'VolumeGainers': `"SYMBOL","SECURITY","TODAY - VOLUME","1 WEEK - AVG. VOLUME","1 WEEK - CHANGE","TODAY - LTP","TODAY - % CHNG"
+"PANACEABIO","Panacea Biotec Limited",24465538,6151110,3.977418061340306,409,13.88
+"20MICRONS","20 Microns Limited",10772476,2740331,3.9310846214149073,216.1,9.22
+"ENERGY","Mirae Asset Mutual Fund",5120919,1392938,3.6763438142975495,35.03,-0.28`,
+                
+                'LowerBand': `Symbol ,Series ,LTP ,%chng ,Price Band % ,Volume (Lakhs)
+GANESHIN,SM,158.95,-19.98,20.00,9.89
+TEMBO,EQ,707.75,-5.00,5.00,1.14
+KAVDEFENCE,BE,77.00,-3.46,5.00,5.64`,
+                
+                'MarketValue': `"SYMBOL ","OPEN ","HIGH ","LOW ","PREV. CLOSE ","LTP ","%CHNG "
+"HINDCOPPER","452.10","480.85","443.25","436.55","476.25","9.09"
+"RVNL","346.70","392.80","345.85","345.70","387.25","12.02"
+"IRFC","122.14","134.59","121.86","121.49","133.60","9.97"`,
+                
+                'UpperBand': `Symbol ,Series ,LTP ,%chng ,Price Band % ,Volume (Lakhs)
+STCINDIA,EQ,131.05,7.50,20.00,21.49
+CUBEXTUB,EQ,111.50,17.89,20.00,15.47
+MODIRUBBER,EQ,167.50,9.99,10.00,8.06`,
+                
+                'TopGainers': `"Symbol","Open","High","Low","Prev. Close","LTP","%chng"
+"PRAKASHSTL",4.19,5,4.19,4.17,5,19.9
+"CUBEXTUB",96.01,113.49,95.04,94.58,111.5,17.89
+"PANACEABIO",373,419.4,366.1,359.15,409,13.88`,
+                
+                'TopLosers': `"Symbol","Open","High","Low","Prev. Close","LTP","%chng"
+"LEMERITE",512.65,512.65,428,508.1,446,-12.22
+"CREATIVEYE",7.74,7.99,7,7.73,7,-9.44
+"TPHQ",0.84,0.84,0.77,0.85,0.77,-9.41`,
+                
+                'NiftyHistorical': `"Index Name","Date","Open","High","Low","Close"
+"NIFTY TOTAL MARKET","26 Dec 2025","13378.1","13402.15","13327.3","13341.80"
+"NIFTY TOTAL MARKET","24 Dec 2025","13413.95","13443.05","13374.6","13382.15"
+"NIFTY TOTAL MARKET","23 Dec 2025","13415.9","13427","13369.9","13409.05"`
+            };
+            
+            // மாதிரி தரவை ஏற்றுதல்
+            Object.keys(sampleFiles).forEach((key, index) => {
+                const csvText = sampleFiles[key];
+                const lines = csvText.split('\n');
+                const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+                
+                const data = [];
+                for (let i = 1; i < lines.length; i++) {
+                    if (!lines[i].trim()) continue;
+                    
+                    let values;
+                    if (lines[i].includes('","')) {
+                        values = lines[i].split('","').map(v => v.replace(/"/g, ''));
+                    } else {
+                        values = lines[i].split(',').map(v => v.trim());
+                    }
+                    
+                    const row = {};
+                    headers.forEach((header, idx) => {
+                        if (values[idx] !== undefined) {
+                            row[header] = values[idx];
+                        }
+                    });
+                    
+                    if (Object.keys(row).length > 0) {
+                        data.push(row);
+                    }
+                }
+                
+                allData[key] = data;
+                
+                // கோப்பு தகவலைக் காட்டுதல்
+                const fileNumber = index + 1;
+                const fileInfoId = key === 'NiftyHistorical' ? 
+                    'historicalFileInfo' : `fileInfo${fileNumber}`;
+                
+                const fileName = key === 'NiftyHistorical' ? 
+                    'NIFTY Historical Data.csv' : `${key}.csv`;
+                
+                document.getElementById(fileInfoId).innerHTML = `
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="fas fa-check-circle text-success"></i>
+                            <strong>${fileName}</strong>
+                            <small class="text-muted"> (மாதிரி தரவு: ${data.length} பதிவுகள்)</small>
+                        </div>
+                        <button class="btn btn-sm btn-outline-danger" onclick="removeFile('${key}')">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `;
+                document.getElementById(fileInfoId).style.display = 'block';
+            });
+            
+            // பகுப்பாய்வு பொத்தானை இயக்கு
+            document.getElementById('analyzeBtn').disabled = false;
+            
+            alert('மாதிரி தரவு வெற்றிகரமாக ஏற்றப்பட்டது! "முழு பகுப்பாய்வு தொடங்கு" பொத்தானைக் கிளிக் செய்யவும்.');
+        }
+        
+        // அனைத்து தரவையும் பகுப்பாய்வு செய்தல்
+        function analyzeAllData() {
+            // ஏற்றும் அடைப்பைக் காட்டு
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            
+            // தரவை செயலாக்குவதற்கு சிறிது நேரம் காத்திருக்கவும்
+            setTimeout(() => {
+                try {
+                    // அனைத்து தரவுகளையும் ஒருங்கிணைத்தல்
+                    analyzedStocks = combineAllData();
+                    
+                    // பங்குகளுக்கு சிக்னல்களை ஒதுக்குதல்
+                    analyzedStocks.forEach(stock => {
+                        stock.signal = assignSignal(stock);
+                        stock.is52WeekHigh = check52WeekHigh(stock);
+                        stock.is52WeekLow = check52WeekLow(stock);
+                        stock.inWatchlist = watchlist.has(stock.symbol);
+                    });
+                    
+                    // UI புதுப்பித்தல்
+                    updateAnalysisUI();
+                    
+                    // ஏற்றும் அடைப்பை மறை
+                    document.getElementById('loadingOverlay').style.display = 'none';
+                    
+                } catch (error) {
+                    alert(`பகுப்பாய்வில் பிழை: ${error.message}`);
+                    console.error(error);
+                    document.getElementById('loadingOverlay').style.display = 'none';
+                }
+            }, 1500);
+        }
+        
+        // அனைத்து தரவுகளையும் ஒருங்கிணைத்தல்
+        function combineAllData() {
+            const allStocks = {};
+            
+            // 1. 52 வாரம் உயர் தரவு
+            if (allData['52WeekHigh']) {
+                allData['52WeekHigh'].forEach(row => {
+                    const symbol = row.Symbol || row['Symbol '];
+                    if (symbol && symbol.trim()) {
+                        if (!allStocks[symbol]) {
+                            allStocks[symbol] = {
+                                symbol: symbol.trim(),
+                                series: row.Series || '',
+                                company: '',
+                                price: parseFloat(row.LTP) || 0,
+                                change: parseFloat(row['%chng']) || 0,
+                                is52WeekHigh: true,
+                                new52WH: parseFloat(row['New 52W/H price']) || 0,
+                                prevHigh: parseFloat(row['Prev.High']) || 0
+                            };
+                        } else {
+                            allStocks[symbol].is52WeekHigh = true;
+                            allStocks[symbol].new52WH = parseFloat(row['New 52W/H price']) || 0;
+                            allStocks[symbol].prevHigh = parseFloat(row['Prev.High']) || 0;
+                        }
+                    }
+                });
+            }
+            
+            // 2. 52 வாரம் தாழ் தரவு
+            if (allData['52WeekLow']) {
+                allData['52WeekLow'].forEach(row => {
+                    const symbol = row.Symbol || row['Symbol '];
+                    if (symbol && symbol.trim()) {
+                        if (!allStocks[symbol]) {
+                            allStocks[symbol] = {
+                                symbol: symbol.trim(),
+                                series: row.Series || '',
+                                company: '',
+                                price: parseFloat(row.LTP) || 0,
+                                change: parseFloat(row['%chng']) || 0,
+                                is52WeekLow: true,
+                                new52WL: parseFloat(row['New 52W/L price']) || 0,
+                                prevLow: parseFloat(row['Prev.Low']) || 0
+                            };
+                        } else {
+                            allStocks[symbol].is52WeekLow = true;
+                            allStocks[symbol].new52WL = parseFloat(row['New 52W/L price']) || 0;
+                            allStocks[symbol].prevLow = parseFloat(row['Prev.Low']) || 0;
+                        }
+                    }
+                });
+            }
+            
+            // 3. சந்தை மதிப்பு தரவு
+            if (allData['MarketValue']) {
+                allData['MarketValue'].forEach(row => {
+                    let symbol = '';
+                    if (row['SYMBOL ']) {
+                        symbol = row['SYMBOL '].trim();
+                    } else if (row.SYMBOL) {
+                        symbol = row.SYMBOL.trim();
+                    }
+                    
+                    if (symbol) {
+                        if (!allStocks[symbol]) {
+                            allStocks[symbol] = {
+                                symbol: symbol,
+                                company: '',
+                                price: parseFloat(row.LTP) || parseFloat(row['LTP ']) || 0,
+                                change: parseFloat(row['%CHNG ']) || parseFloat(row['%CHNG']) || 0,
+                                open: parseFloat(row.OPEN) || parseFloat(row['OPEN ']) || 0,
+                                high: parseFloat(row.HIGH) || parseFloat(row['HIGH ']) || 0,
+                                low: parseFloat(row.LOW) || parseFloat(row['LOW ']) || 0
+                            };
+                        } else {
+                            allStocks[symbol].price = parseFloat(row.LTP) || parseFloat(row['LTP ']) || allStocks[symbol].price;
+                            allStocks[symbol].change = parseFloat(row['%CHNG ']) || parseFloat(row['%CHNG']) || allStocks[symbol].change;
+                        }
+                    }
+                });
+            }
+            
+            // 4. மேல் பட்டை தரவு
+            if (allData['UpperBand']) {
+                allData['UpperBand'].forEach(row => {
+                    const symbol = row.Symbol || row['Symbol '];
+                    if (symbol && symbol.trim()) {
+                        if (!allStocks[symbol]) {
+                            allStocks[symbol] = {
+                                symbol: symbol.trim(),
+                                series: row.Series || '',
+                                price: parseFloat(row.LTP) || 0,
+                                change: parseFloat(row['%chng']) || 0,
+                                isUpperBand: true,
+                                priceBand: row['Price Band %'] || ''
+                            };
+                        } else {
+                            allStocks[symbol].isUpperBand = true;
+                            allStocks[symbol].priceBand = row['Price Band %'] || '';
+                        }
+                    }
+                });
+            }
+            
+            // 5. கீழ் பட்டை தரவு
+            if (allData['LowerBand']) {
+                allData['LowerBand'].forEach(row => {
+                    const symbol = row.Symbol || row['Symbol '];
+                    if (symbol && symbol.trim()) {
+                        if (!allStocks[symbol]) {
+                            allStocks[symbol] = {
+                                symbol: symbol.trim(),
+                                series: row.Series || '',
+                                price: parseFloat(row.LTP) || 0,
+                                change: parseFloat(row['%chng']) || 0,
+                                isLowerBand: true,
+                                priceBand: row['Price Band %'] || ''
+                            };
+                        } else {
+                            allStocks[symbol].isLowerBand = true;
+                            allStocks[symbol].priceBand = row['Price Band %'] || '';
+                        }
+                    }
+                });
+            }
+            
+            // 6. முதலிடம் பெற்றவை
+            if (allData['TopGainers']) {
+                allData['TopGainers'].forEach(row => {
+                    const symbol = row.Symbol;
+                    if (symbol && symbol.trim()) {
+                        if (!allStocks[symbol]) {
+                            allStocks[symbol] = {
+                                symbol: symbol.trim(),
+                                price: parseFloat(row.LTP) || 0,
+                                change: parseFloat(row['%chng']) || 0,
+                                isTopGainer: true,
+                                open: parseFloat(row.Open) || 0,
+                                high: parseFloat(row.High) || 0,
+                                low: parseFloat(row.Low) || 0
+                            };
+                        } else {
+                            allStocks[symbol].isTopGainer = true;
+                            allStocks[symbol].change = parseFloat(row['%chng']) || allStocks[symbol].change;
+                        }
+                    }
+                });
+            }
+            
+            // 7. தோல்வியடைந்தவை
+            if (allData['TopLosers']) {
+                allData['TopLosers'].forEach(row => {
+                    const symbol = row.Symbol;
+                    if (symbol && symbol.trim()) {
+                        if (!allStocks[symbol]) {
+                            allStocks[symbol] = {
+                                symbol: symbol.trim(),
+                                price: parseFloat(row.LTP) || 0,
+                                change: parseFloat(row['%chng']) || 0,
+                                isTopLoser: true,
+                                open: parseFloat(row.Open) || 0,
+                                high: parseFloat(row.High) || 0,
+                                low: parseFloat(row.Low) || 0
+                            };
+                        } else {
+                            allStocks[symbol].isTopLoser = true;
+                            allStocks[symbol].change = parseFloat(row['%chng']) || allStocks[symbol].change;
+                        }
+                    }
+                });
+            }
+            
+            // வரிசைப்படுத்தப்பட்ட பட்டியலாக மாற்றுதல்
+            const stockArray = Object.values(allStocks);
+            
+            // கூடுதல் தகவல்களைச் சேர்த்தல்
+            stockArray.forEach(stock => {
+                // மாற்றம் சதவீதத்தை உறுதிப்படுத்துதல்
+                if (!stock.change && stock.price && stock.open) {
+                    stock.change = ((stock.price - stock.open) / stock.open) * 100;
+                }
+                
+                // நிறுவனப் பெயரைச் சேர்த்தல் (மாதிரி)
+                stock.company = getCompanyName(stock.symbol);
+                
+                // தொகுதி தகவல் (மாதிரி)
+                stock.volume = Math.floor(Math.random() * 10000000) + 100000;
+            });
+            
+            return stockArray;
+        }
+        
+        // நிறுவனப் பெயரைப் பெறுதல் (மாதிரி)
+        function getCompanyName(symbol) {
+            const companyNames = {
+                'HINDCOPPER': 'இந்திய தாமிர கழகம்',
+                'RVNL': 'ரெயில் விக் நிர்மாண் நிகம் லிமிடெட்',
+                'IRFC': 'இந்திய ரெயில்வே நிதி நிறுவனம்',
+                'PANACEABIO': 'பனாசியா பயோடெக்',
+                'TITAN': 'டைட்டன் நிறுவனம்',
+                'RELIANCE': 'ரிலையன்ஸ் இண்டஸ்ட்ரீஸ்',
+                'TCS': 'டாடா கன்சல்டன்சி சர்வீஸஸ்',
+                'INFY': 'இன்ஃபோசிஸ்',
+                'HDFCBANK': 'எச்.டி.எப்.சி. வங்கி',
+                'ICICIBANK': 'ஐ.சி.ஐ.சி.ஐ வங்கி'
+            };
+            
+            return companyNames[symbol] || symbol;
+        }
+        
+        // சிக்னலை ஒதுக்குதல்
+        function assignSignal(stock) {
+            // அடிப்படை பகுப்பாய்வு விதிமுறைகள்
+            const change = stock.change || 0;
+            const is52WeekHigh = stock.is52WeekHigh || false;
+            const is52WeekLow = stock.is52WeekLow || false;
+            const isTopGainer = stock.isTopGainer || false;
+            const isTopLoser = stock.isTopLoser || false;
+            const isUpperBand = stock.isUpperBand || false;
+            const isLowerBand = stock.isLowerBand || false;
+            
+            // முடிவெடுக்கும் தர்க்கம்
+            if (isTopGainer && change > 5 && !isUpperBand) {
+                return 'வாங்க';
+            } else if (isTopLoser && change < -5 && !isLowerBand) {
+                return 'விற்க';
+            } else if (is52WeekHigh && change > 0) {
+                return 'காத்திரு';
+            } else if (is52WeekLow && change < 0) {
+                return 'வாங்க';
+            } else if (change > 3) {
+                return 'வாங்க';
+            } else if (change < -3) {
+                return 'விற்க';
+            } else {
+                return 'காத்திரு';
+            }
+        }
+        
+        // 52 வாரம் உயர் சரிபார்த்தல்
+        function check52WeekHigh(stock) {
+            return stock.is52WeekHigh || false;
+        }
+        
+        // 52 வாரம் தாழ் சரிபார்த்தல்
+        function check52WeekLow(stock) {
+            return stock.is52WeekLow || false;
+        }
+        
+        // பகுப்பாய்வு UI புதுப்பித்தல்
+        function updateAnalysisUI() {
+            // முடிவுகள் பகுதியைக் காட்டு
+            document.getElementById('analysisResults').style.display = 'block';
+            
+            // சுருக்கத்தைப் புதுப்பித்தல்
+            document.getElementById('analysisSummaryText').textContent = 
+                `${analyzedStocks.length} பங்குகள் பகுப்பாய்வு செய்யப்பட்டுள்ளன. ` +
+                `${analyzedStocks.filter(s => s.signal === 'வாங்க').length} வாங்க பரிந்துரைகள், ` +
+                `${analyzedStocks.filter(s => s.signal === 'விற்க').length} விற்க பரிந்துரைகள்.`;
+            
+            // புள்ளிவிவரங்களைப் புதுப்பித்தல்
+            updateStatistics();
+            
+            // பங்கு அட்டவணையைப் புதுப்பித்தல்
+            updateStocksTable();
+            
+            // வரைபடங்களை உருவாக்குதல்
+            createCharts();
+            
+            // WhatsApp தேர்வியைப் புதுப்பித்தல்
+            updateWhatsAppSelector();
+            
+            // தாவலை மேல் பகுதிக்கு உருட்டு
+            document.getElementById('analysisResults').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        // புள்ளிவிவரங்களைப் புதுப்பித்தல்
+        function updateStatistics() {
+            const total = analyzedStocks.length;
+            const buy = analyzedStocks.filter(s => s.signal === 'வாங்க').length;
+            const sell = analyzedStocks.filter(s => s.signal === 'விற்க').length;
+            const hold = analyzedStocks.filter(s => s.signal === 'காத்திரு').length;
+            
+            document.getElementById('totalStocks').textContent = total;
+            document.getElementById('buyStocks').textContent = buy;
+            document.getElementById('sellStocks').textContent = sell;
+            document.getElementById('holdStocks').textContent = hold;
+        }
+        
+        // பங்கு அட்டவணையைப் புதுப்பித்தல்
+        function updateStocksTable() {
+            const tbody = document.getElementById('stocksTableBody');
+            tbody.innerHTML = '';
+            
+            // வடிகட்டுதல்
+            let filteredStocks = analyzedStocks;
+            if (currentFilter === 'buy') {
+                filteredStocks = analyzedStocks.filter(s => s.signal === 'வாங்க');
+            } else if (currentFilter === 'sell') {
+                filteredStocks = analyzedStocks.filter(s => s.signal === 'விற்க');
+            } else if (currentFilter === 'hold') {
+                filteredStocks = analyzedStocks.filter(s => s.signal === 'காத்திரு');
+            } else if (currentFilter === 'watchlist') {
+                filteredStocks = analyzedStocks.filter(s => s.inWatchlist);
+            } else if (currentFilter === '52weekhigh') {
+                filteredStocks = analyzedStocks.filter(s => s.is52WeekHigh);
+            } else if (currentFilter === '52weeklow') {
+                filteredStocks = analyzedStocks.filter(s => s.is52WeekLow);
+            }
+            
+            // அட்டவணையை நிரப்புதல்
+            filteredStocks.forEach((stock, index) => {
+                const row = document.createElement('tr');
+                
+                // மாற்றம் வகுப்பு
+                const changeClass = stock.change > 0 ? 'positive' : 'negative';
+                const changeText = stock.change > 0 ? `+${stock.change.toFixed(2)}%` : `${stock.change.toFixed(2)}%`;
+                
+                // சிக்னல் பேட்ஜ்
+                let signalBadge;
+                if (stock.signal === 'வாங்க') {
+                    signalBadge = `<span class="signal-badge signal-buy">${stock.signal}</span>`;
+                } else if (stock.signal === 'விற்க') {
+                    signalBadge = `<span class="signal-badge signal-sell">${stock.signal}</span>`;
+                } else {
+                    signalBadge = `<span class="signal-badge signal-hold">${stock.signal}</span>`;
+                }
+                
+                // 52W உயர்/தாழ்
+                const highBadge = stock.is52WeekHigh ? 
+                    '<span class="badge bg-success">உயர்</span>' : '';
+                const lowBadge = stock.is52WeekLow ? 
+                    '<span class="badge bg-danger">தாழ்</span>' : '';
+                
+                // வாட்ச்லிஸ்ட் நட்சத்திரம்
+                const watchlistClass = stock.inWatchlist ? 'active' : '';
+                const watchlistIcon = stock.inWatchlist ? 'fas' : 'far';
+                
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>
+                        <strong>${stock.symbol}</strong><br>
+                        <small class="text-muted">${stock.company}</small>
+                    </td>
+                    <td>₹${stock.price.toFixed(2)}</td>
+                    <td class="${changeClass}">${changeText}</td>
+                    <td>${signalBadge}</td>
+                    <td>${highBadge}</td>
+                    <td>${lowBadge}</td>
+                    <td>
+                        <i class="${watchlistIcon} fa-star watchlist-star ${watchlistClass}" 
+                           onclick="toggleWatchlist('${stock.symbol}')"></i>
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-info" onclick="viewStockDetails('${stock.symbol}')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn btn-sm btn-success" onclick="shareStock('${stock.symbol}')">
+                            <i class="fab fa-whatsapp"></i>
+                        </button>
+                    </td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
+        
+        // வடிகட்டுதல்
+        function filterStocks(filterType) {
+            currentFilter = filterType;
+            
+            // பொத்தான்களைப் புதுப்பித்தல்
+            document.querySelectorAll('.filter-buttons .btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // அட்டவணையைப் புதுப்பித்தல்
+            updateStocksTable();
+        }
+        
+        // வாட்ச்லிஸ்டை மாற்றுதல்
+        function toggleWatchlist(symbol) {
+            const stock = analyzedStocks.find(s => s.symbol === symbol);
+            if (stock) {
+                stock.inWatchlist = !stock.inWatchlist;
+                if (stock.inWatchlist) {
+                    watchlist.add(symbol);
+                } else {
+                    watchlist.delete(symbol);
+                }
+                updateStocksTable();
+            }
+        }
+        
+        // வரைபடங்களை உருவாக்குதல்
+        function createCharts() {
+            // சிக்னல் பகிர்வு வரைபடம்
+            const signalCtx = document.getElementById('signalChart').getContext('2d');
+            const buyCount = analyzedStocks.filter(s => s.signal === 'வாங்க').length;
+            const sellCount = analyzedStocks.filter(s => s.signal === 'விற்க').length;
+            const holdCount = analyzedStocks.filter(s => s.signal === 'காத்திரு').length;
+            
+            if (charts.signalChart) {
+                charts.signalChart.destroy();
+            }
+            
+            charts.signalChart = new Chart(signalCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['வாங்க', 'விற்க', 'காத்திரு'],
+                    datasets: [{
+                        data: [buyCount, sellCount, holdCount],
+                        backgroundColor: ['#10b981', '#ef4444', '#f59e0b'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        },
+                        title: {
+                            display: true,
+                            text: 'சிக்னல் பகிர்வு'
+                        }
+                    }
+                }
+            });
+            
+            // மேல் 10 பங்குகள் வரைபடம்
+            const topStocksCtx = document.getElementById('topStocksChart').getContext('2d');
+            const topStocks = [...analyzedStocks]
+                .sort((a, b) => (b.change || 0) - (a.change || 0))
+                .slice(0, 10);
+            
+            if (charts.topStocksChart) {
+                charts.topStocksChart.destroy();
+            }
+            
+            charts.topStocksChart = new Chart(topStocksCtx, {
+                type: 'bar',
+                data: {
+                    labels: topStocks.map(s => s.symbol),
+                    datasets: [{
+                        label: 'மாற்றம் %',
+                        data: topStocks.map(s => s.change || 0),
+                        backgroundColor: topStocks.map(s => 
+                            (s.change || 0) >= 0 ? '#10b981' : '#ef4444'
+                        )
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'மாற்றம் %'
+                            }
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'மேல் 10 பங்குகள்'
+                        }
+                    }
+                }
+            });
+            
+            // நிஃப்டி வரலாறு வரைபடம்
+            if (allData['NiftyHistorical']) {
+                const niftyCtx = document.getElementById('niftyChart').getContext('2d');
+                const niftyData = allData['NiftyHistorical'];
+                
+                // தேதிகளை வரிசைப்படுத்துதல்
+                niftyData.sort((a, b) => new Date(a.Date) - new Date(b.Date));
+                
+                const dates = niftyData.map(d => d.Date).slice(-30); // கடைசி 30 நாட்கள்
+                const closes = niftyData.map(d => parseFloat(d.Close)).slice(-30);
+                
+                if (charts.niftyChart) {
+                    charts.niftyChart.destroy();
+                }
+                
+                charts.niftyChart = new Chart(niftyCtx, {
+                    type: 'line',
+                    data: {
+                        labels: dates,
+                        datasets: [{
+                            label: 'நிஃப்டி மூடல்',
+                            data: closes,
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            fill: true,
+                            tension: 0.1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'தேதி'
+                                }
+                            },
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: 'மதிப்பு'
+                                }
+                            }
+                        },
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'நிஃப்டி சந்தை செயல்பாடு (கடைசி 30 நாட்கள்)'
+                            }
+                        }
+                    }
+                });
+            }
+        }
+        
+        // WhatsApp தேர்வியைப் புதுப்பித்தல்
+        function updateWhatsAppSelector() {
+            const select = document.getElementById('whatsappStockSelect');
+            select.innerHTML = '<option value="">பங்கைத் தேர்ந்தெடுக்கவும்</option>';
+            
+            analyzedStocks.forEach(stock => {
+                const option = document.createElement('option');
+                option.value = stock.symbol;
+                option.textContent = `${stock.symbol} - ${stock.company}`;
+                select.appendChild(option);
+            });
+        }
+        
+        // பங்கு விவரங்களைக் காண்பித்தல்
+        function viewStockDetails(symbol) {
+            const stock = analyzedStocks.find(s => s.symbol === symbol);
+            if (!stock) return;
+            
+            alert(`
+பங்கு: ${stock.symbol}
+நிறுவனம்: ${stock.company}
+விலை: ₹${stock.price.toFixed(2)}
+மாற்றம்: ${stock.change > 0 ? '+' : ''}${stock.change.toFixed(2)}%
+சிக்னல்: ${stock.signal}
+52W உயர்: ${stock.is52WeekHigh ? 'ஆம்' : 'இல்லை'}
+52W தாழ்: ${stock.is52WeekLow ? 'ஆம்' : 'இல்லை'}
+வாட்ச்லிஸ்ட்: ${stock.inWatchlist ? 'ஆம்' : 'இல்லை'}
+            `);
+        }
+        
+        // பங்கைப் பகிர்தல்
+        function shareStock(symbol) {
+            const stock = analyzedStocks.find(s => s.symbol === symbol);
+            if (!stock) return;
+            
+            const message = `பங்கு: ${stock.symbol} (${stock.company})
+விலை: ₹${stock.price.toFixed(2)}
+மாற்றம்: ${stock.change > 0 ? '+' : ''}${stock.change.toFixed(2)}%
+சிக்னல்: ${stock.signal}
+பரிந்துரை: ${stock.signal === 'வாங்க' ? 'வாங்க பரிந்துரைக்கப்படுகிறது' : 
+                stock.signal === 'விற்க' ? 'விற்க பரிந்துரைக்கப்படுகிறது' : 'காத்திரு பரிந்துரைக்கப்படுகிறது'}`;
+            
+            const encodedMessage = encodeURIComponent(message);
+            const whatsappLink = `https://wa.me/?text=${encodedMessage}`;
+            
+            document.getElementById('whatsappMessage').textContent = message;
+            document.getElementById('whatsappLink').href = whatsappLink;
+            
+            const modal = new bootstrap.Modal(document.getElementById('whatsappModal'));
+            modal.show();
+        }
+        
+        // WhatsApp இல் பங்கைப் பகிர்தல்
+        function shareStockOnWhatsApp() {
+            const symbol = document.getElementById('whatsappStockSelect').value;
+            const phoneNumber = document.getElementById('whatsappNumber').value;
+            
+            if (!symbol) {
+                alert('முதலில் பங்கைத் தேர்ந்தெடுக்கவும்');
+                return;
+            }
+            
+            if (!phoneNumber) {
+                alert('WhatsApp எண்ணை உள்ளிடவும்');
+                return;
+            }
+            
+            const stock = analyzedStocks.find(s => s.symbol === symbol);
+            if (!stock) return;
+            
+            const message = `பங்கு: ${stock.symbol} (${stock.company})
+விலை: ₹${stock.price.toFixed(2)}
+மாற்றம்: ${stock.change > 0 ? '+' : ''}${stock.change.toFixed(2)}%
+சிக்னல்: ${stock.signal}
+பரிந்துரை: ${stock.signal === 'வாங்க' ? 'வாங்க பரிந்துரைக்கப்படுகிறது' : 
+                stock.signal === 'விற்க' ? 'விற்க பரிந்துரைக்கப்படுகிறது' : 'காத்திரு பரிந்துரைக்கப்படுகிறது'}`;
+            
+            const encodedMessage = encodeURIComponent(message);
+            const whatsappLink = `https://wa.me/${phoneNumber.replace('+', '')}?text=${encodedMessage}`;
+            
+            window.open(whatsappLink, '_blank');
+        }
+        
+        // WhatsApp இல் முழு அறிக்கையைப் பகிர்தல்
+        function shareFullReportOnWhatsApp() {
+            const phoneNumber = document.getElementById('whatsappNumberFull').value;
+            
+            if (!phoneNumber) {
+                alert('WhatsApp எண்ணை உள்ளிடவும்');
+                return;
+            }
+            
+            const total = analyzedStocks.length;
+            const buy = analyzedStocks.filter(s => s.signal === 'வாங்க').length;
+            const sell = analyzedStocks.filter(s => s.signal === 'விற்க').length;
+            const hold = analyzedStocks.filter(s => s.signal === 'காத்திரு').length;
+            
+            const message = `📊 பங்குச் சந்தை பகுப்பாய்வு அறிக்கை
+தேதி: ${new Date().toLocaleDateString('ta-IN')}
+மொத்த பங்குகள்: ${total}
+வாங்க பரிந்துரைகள்: ${buy}
+விற்க பரிந்துரைகள்: ${sell}
+காத்திரு பரிந்துரைகள்: ${hold}
+
+மேல் 5 வாங்க பரிந்துரைகள்:
+${analyzedStocks.filter(s => s.signal === 'வாங்க').slice(0, 5).map(s => `${s.symbol}: ₹${s.price.toFixed(2)} (${s.change > 0 ? '+' : ''}${s.change.toFixed(2)}%)`).join('\n')}
+
+மேலும் விவரங்களுக்கு ஆப்ஸைப் பார்வையிடவும்.`;
+            
+            const encodedMessage = encodeURIComponent(message);
+            const whatsappLink = `https://wa.me/${phoneNumber.replace('+', '')}?text=${encodedMessage}`;
+            
+            window.open(whatsappLink, '_blank');
+        }
+        
+        // CSV இறக்கம்
+        function exportToCSV() {
+            const csvData = analyzedStocks.map(stock => ({
+                'பங்கு': stock.symbol,
+                'நிறுவனம்': stock.company,
+                'விலை': stock.price.toFixed(2),
+                'மாற்றம்%': `${stock.change > 0 ? '+' : ''}${stock.change.toFixed(2)}`,
+                'சிக்னல்': stock.signal,
+                '52W உயர்': stock.is52WeekHigh ? 'ஆம்' : 'இல்லை',
+                '52W தாழ்': stock.is52WeekLow ? 'ஆம்' : 'இல்லை',
+                'வாட்ச்லிஸ்ட்': stock.inWatchlist ? 'ஆம்' : 'இல்லை'
+            }));
+            
+            const csvContent = "data:text/csv;charset=utf-8," 
+                + [Object.keys(csvData[0]).join(",")]
+                .concat(csvData.map(row => Object.values(row).join(",")))
+                .join("\n");
+            
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `பங்கு_பகுப்பாய்வு_${new Date().toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+        
+        // Excel இறக்கம்
+        function exportToExcel() {
+            const worksheet = XLSX.utils.json_to_sheet(analyzedStocks.map(stock => ({
+                'பங்கு': stock.symbol,
+                'நிறுவனம்': stock.company,
+                'விலை': stock.price.toFixed(2),
+                'மாற்றம்%': `${stock.change > 0 ? '+' : ''}${stock.change.toFixed(2)}`,
+                'சிக்னல்': stock.signal,
+                '52W உயர்': stock.is52WeekHigh ? 'ஆம்' : 'இல்லை',
+                '52W தாழ்': stock.is52WeekLow ? 'ஆம்' : 'இல்லை',
+                'வாட்ச்லிஸ்ட்': stock.inWatchlist ? 'ஆம்' : 'இல்லை'
+            })));
+            
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "பங்கு பகுப்பாய்வு");
+            
+            XLSX.writeFile(workbook, `பங்கு_பகுப்பாய்வு_${new Date().toISOString().split('T')[0]}.xlsx`);
+        }
+        
+        // PDF இறக்கம்
+        function exportToPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // தலைப்பு
+            doc.setFontSize(20);
+            doc.setTextColor(30, 58, 138);
+            doc.text('பங்குச் சந்தை பகுப்பாய்வு அறிக்கை', 105, 20, { align: 'center' });
+            
+            doc.setFontSize(12);
+            doc.setTextColor(0, 0, 0);
+            doc.text(`தேதி: ${new Date().toLocaleDateString('ta-IN')}`, 105, 30, { align: 'center' });
+            
+            // புள்ளிவிவரங்கள்
+            const total = analyzedStocks.length;
+            const buy = analyzedStocks.filter(s => s.signal === 'வாங்க').length;
+            const sell = analyzedStocks.filter(s => s.signal === 'விற்க').length;
+            const hold = analyzedStocks.filter(s => s.signal === 'காத்திரு').length;
+            
+            doc.text(`மொத்த பங்குகள்: ${total}`, 20, 45);
+            doc.text(`வாங்க பரிந்துரைகள்: ${buy}`, 20, 55);
+            doc.text(`விற்க பரிந்துரைகள்: ${sell}`, 20, 65);
+            doc.text(`காத்திரு பரிந்துரைகள்: ${hold}`, 20, 75);
+            
+            // அட்டவணை
+            const tableData = analyzedStocks.map(stock => [
+                stock.symbol,
+                stock.company,
+                stock.price.toFixed(2),
+                `${stock.change > 0 ? '+' : ''}${stock.change.toFixed(2)}%`,
+                stock.signal,
+                stock.is52WeekHigh ? 'ஆம்' : 'இல்லை',
+                stock.is52WeekLow ? 'ஆம்' : 'இல்லை'
+            ]);
+            
+            doc.autoTable({
+                head: [['பங்கு', 'நிறுவனம்', 'விலை', 'மாற்றம்%', 'சிக்னல்', '52W உயர்', '52W தாழ்']],
+                body: tableData,
+                startY: 85,
+                styles: { fontSize: 8 },
+                headStyles: { fillColor: [30, 58, 138] }
+            });
+            
+            // சேமித்தல்
+            doc.save(`பங்கு_பகுப்பாய்வு_${new Date().toISOString().split('T')[0]}.pdf`);
+        }
+        
+        // முழு அறிக்கையை உருவாக்குதல்
+        function exportFullReport() {
+            exportToPDF();
+        }
+        
+        // விரிவான அறிக்கையை உருவாக்குதல்
+        function generateDetailedReport() {
+            alert('விரிவான அறிக்கை உருவாக்கப்பட்டது! இது PDF இறக்கம் செயல்பாட்டைத் தொடங்குகிறது.');
+            exportToPDF();
+        }
+    </script>
+</body>
+</html>
